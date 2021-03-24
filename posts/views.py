@@ -1,16 +1,17 @@
-from rest_framework.generics import get_object_or_404
-from rest_framework.response import Response
-from posts.permissions import IsAuthorOrReadOnly
 from rest_framework import viewsets
-from .models import Post, Comment
-from .serializers import PostSerializers, CommentSerializers
-from .permissions import IsAuthorOrReadOnly, IsAuthenticated
+from rest_framework.generics import get_object_or_404
+from rest_framework.permissions import IsAuthenticatedOrReadOnly
+from rest_framework.response import Response
+
+from .models import Comment, Post
+from .permissions import IsAuthorOrReadOnly
+from .serializers import CommentSerializers, PostSerializers
 
 
 class PostViewSet(viewsets.ModelViewSet):
     queryset = Post.objects.all()
     serializer_class = PostSerializers
-    permission_classes = [IsAuthorOrReadOnly, IsAuthenticated]
+    permission_classes = [IsAuthorOrReadOnly, IsAuthenticatedOrReadOnly]
 
     def perform_create(self, serializer):
         """ Переопределяем функцию, сохраняем поле автора"""
@@ -20,7 +21,7 @@ class PostViewSet(viewsets.ModelViewSet):
 class CommentViewSet(viewsets.ModelViewSet):
     queryset = Comment.objects.all()
     serializer_class = CommentSerializers
-    permission_classes = [IsAuthorOrReadOnly, IsAuthenticated]
+    permission_classes = [IsAuthorOrReadOnly, IsAuthenticatedOrReadOnly]
 
     def list(self, request, post_id=None):
         """Собираем коменты по id поста и прогоняем через сериализатор"""
