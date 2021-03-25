@@ -23,13 +23,11 @@ class CommentViewSet(viewsets.ModelViewSet):
     serializer_class = CommentSerializers
     permission_classes = [IsAuthorOrReadOnly, IsAuthenticatedOrReadOnly]
 
-    def list(self, request, post_id=None):
-        """Собираем коменты по id поста и прогоняем через сериализатор"""
-        post = get_object_or_404(Post, pk=post_id)
-        queryset = post.comments.all()
-        serializers = CommentSerializers(queryset, many=True)
-        return Response(serializers.data)
+    def get_queryset(self, **kwargs):
+        post = get_object_or_404(Post, pk=self.kwargs.get('post_id',))
+        return post.comments.all()
 
-    def perform_create(self, serializer):
+    def perform_create(self, serializer, **kwargs):
         """ Переопределяем функцию, сохраняем поле автора"""
-        serializer.save(author=self.request.user)
+        post = get_object_or_404(Post, pk=self.kwargs.get('post_id'))
+        serializer.save(author=self.request.user, post_id=post.id)
